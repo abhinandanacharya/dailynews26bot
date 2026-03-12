@@ -13,6 +13,7 @@
  *  Install : npm install
  *  Run     : node bot.js
  *  Dev     : npm run dev
+ * add express js
  */
 
 "use strict";
