@@ -429,7 +429,7 @@ function buildCards(articles, key) {
     const artId  = storeArticle(art);
 
     lines.push(`${bullet} <b>${num}.</b>  <b>${title}</b>`);
-    lines.push(`     🏢 <code>${source}</code>   🕐 <i>${ago}</i>`);
+    lines.push(`     🏢 <button onclick="buildArticlePopup(${art})">${source}</button>   🕐 <i>${ago}</i>`);
     lines.push(`     ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄`);
     lines.push(``);
 
