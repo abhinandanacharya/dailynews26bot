@@ -428,17 +428,45 @@ function buildCards(articles, key) {
     const ago    = h(art.ago || art.pubDate);
     const artId  = storeArticle(art);
 
+    // lines.push(`${bullet} <b>${num}.</b>  <b>${title}</b>`);
+    // lines.push(`     🏢 <button onclick="buildArticlePopup(${art})">${source}</button>   🕐 <i>${ago}</i>`);
+    // lines.push(`     ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄`);
+    // lines.push(``);
+
+    // const row = [{ text: `👁 Read #${num}`, callback_data: `read:${artId}` }];
+    // if (art.link) row.push({ text: `🌐 Web`, url: art.link });
+    // keyboard.push(row);
+
+    //new code 
     lines.push(`${bullet} <b>${num}.</b>  <b>${title}</b>`);
-    lines.push(`     🏢 <button onclick="buildArticlePopup(${art})">${source}</button>   🕐 <i>${ago}</i>`);
-    lines.push(`     ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄`);
     lines.push(``);
 
-    const row = [{ text: `👁 Read #${num}`, callback_data: `read:${artId}` }];
-    if (art.link) row.push({ text: `🌐 Web`, url: art.link });
-    keyboard.push(row);
+    const srcShort = art.source.length > 20 ? art.source.slice(0, 18) + "…" : art.source;
+    keyboard.push([
+      { text: `${bullet} ${num}  ┊  🏢 ${srcShort}  ┊  🕐 ${art.ago}`, callback_data: `noop` },
+    ]);
+
+    const actionRow = [
+      { text: `👁  Read Full Story`, callback_data: `read:${artId}` },
+    ];
+    if (art.link) actionRow.push({ text: `🌐  Open Web`, url: art.link });
+    keyboard.push(actionRow);
+
+    if (i < articles.length - 1) {
+      keyboard.push([{ text: `────────────────────────`, callback_data: `noop` }]);
+    }
   });
 
-  lines.push(`<i>⚡ @DailyNews26Bot  •  Tap 👁 Read to view inside Telegram</i>`);
+  //lines.push(`<i>⚡ @DailyNews26Bot  •  Tap 👁 Read to view inside Telegram</i>`);
+
+  //new line
+  keyboard.push([
+    { text: `🔄  Refresh`, callback_data: `refresh:${key}` },
+    { text: `🏠  Main Menu`, callback_data: `menu` },
+  ]);
+
+  lines.push(`<i>⚡ Tap <b>👁 Read Full Story</b> to read inside Telegram</i>`);
+  lines.push(`<i>📡 Powered by Google News RSS</i>`);
 
   return {
     text: lines.join("\n"),
@@ -510,6 +538,29 @@ bot.on("callback_query", async (query) => {
   if (data === "close") {
     await bot.answerCallbackQuery(query.id, { text: "Closed ✓" });
     try { await bot.deleteMessage(chatId, query.message.message_id); } catch {}
+    return;
+  }
+
+ // await bot.answerCallbackQuery(query.id, { text: "Unknown action" });
+  //new code 
+  if (data.startsWith("refresh:")) {
+    const key = data.slice(8);
+    await bot.answerCallbackQuery(query.id, { text: "🔄 Refreshing…" });
+    await sendNews(chatId, key);
+    return;
+  }
+
+  if (data === "menu") {
+    const name = query.from?.first_name || "friend";
+    await bot.answerCallbackQuery(query.id, { text: "🏠 Main Menu" });
+    await bot.sendMessage(chatId, buildWelcome(name), {
+      parse_mode: "HTML", disable_web_page_preview: true,
+    });
+    return;
+  }
+
+  if (data === "noop") {
+    await bot.answerCallbackQuery(query.id, { text: "" });
     return;
   }
 
