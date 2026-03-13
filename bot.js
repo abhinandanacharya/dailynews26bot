@@ -199,6 +199,21 @@ app.listen(PORT, () => {
 });
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  KEEP-ALIVE  — Render free tier spin-down prevent
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+const SELF_URL = process.env.RENDER_EXTERNAL_URL;
+
+setInterval(async () => {
+  try {
+    await axios.get(`${SELF_URL}/health`);
+    log("info", "💓 Keep-alive ping sent");
+  } catch (err) {
+    log("warn", "Keep-alive failed:", err.message);
+  }
+}, 10 * 60 * 1000); //  10 minute ping
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 //  IN-MEMORY ARTICLE CACHE
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
